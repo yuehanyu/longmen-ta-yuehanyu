@@ -1,0 +1,55 @@
+name: 从母版同步更新
+
+on:
+  schedule:
+    # 北京时间每天 08:00（UTC 00:00）
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: 配置 Git
+        run: |
+          git config user.name "longmen-bot"
+          git config user.email "bot@longmen.edu"
+
+      - name: 从母版拉取最新内容
+        run: |
+          git remote add upstream https://github.com/longmenjihua/longmen-ta-template.git || true
+          git fetch upstream main
+
+      - name: 同步所有文件（保留四个每日目录不动）
+        run: |
+          # 获取母版中所有文件列表，排除四个每日工作目录
+          FILES=$(git ls-tree -r --name-only upstream/main | grep -vE "^(每日输出|每日反馈|每日解答|每日补充)/")
+
+          if [ -z "$FILES" ]; then
+            echo "没有需要同步的文件"
+            exit 0
+          fi
+
+          # 从母版检出这些文件（覆盖本地）
+          echo "$FILES" | xargs git checkout upstream/main --
+
+      - name: 提交并推送（如有更新）
+        run: |
+          git add -A
+          if git diff --staged --quiet; then
+            echo "无更新，跳过提交"
+          else
+            CHANGED=$(git diff --staged --name-only | head -10)
+            git commit -m "sync: 同步母版更新 $(date +'%Y-%m-%d')
+
+更新文件：
+$CHANGED"
+            git push
+            echo "同步完成"
+          fi
