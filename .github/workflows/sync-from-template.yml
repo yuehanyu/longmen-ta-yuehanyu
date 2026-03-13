@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.LONGMEN_PAT }}
           fetch-depth: 0
 
       - name: 配置 Git
@@ -23,7 +23,7 @@ jobs:
 
       - name: 从母版拉取最新内容
         run: |
-          git remote add upstream https://github.com/longmenjihua/longmen-ta-template.git || true
+          git remote add upstream https://${{ secrets.LONGMEN_PAT }}@github.com/longmenjihua/longmen-ta-template.git || true
           git fetch upstream main
 
       - name: 同步所有文件（保留四个每日目录不动）

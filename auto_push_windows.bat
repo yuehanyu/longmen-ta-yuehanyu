@@ -33,8 +33,8 @@ if %errorlevel% neq 0 (
     goto :end
 )
 
-:: 暂存所有改动
-git add . >> "%LOG_FILE%" 2>&1
+:: 只暂存4个每日工作文件夹（不提交其他文件）
+git add "每日输出/" "每日解答/" "每日补充/" "每日反馈/" >> "%LOG_FILE%" 2>&1
 
 :: 检查是否有新内容
 git diff --staged --quiet

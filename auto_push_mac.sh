@@ -32,8 +32,8 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
-# 暂存所有改动
-git add .
+# 只暂存4个每日工作文件夹（不提交其他文件）
+git add "每日输出/" "每日解答/" "每日补充/" "每日反馈/" 2>/dev/null || true
 
 # 检查是否有新内容
 if git diff --staged --quiet; then
